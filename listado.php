@@ -26,6 +26,7 @@ try {
   } 
 
   if ($_SERVER["REQUEST_METHOD"] == "POST") {   
+    $fechaNacimientoValida = preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$_POST['datanaix']);
     if (!empty($_POST['nom']) 
     && !empty($_POST['cognom']) 
     && $fechaNacimientoValida) {
