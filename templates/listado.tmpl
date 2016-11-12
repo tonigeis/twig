@@ -1,10 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>CRUD BASICO CON TWIG</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="http://www.w3schools.com/lib/w3.css">
+	<script type="text/javascript">
+
+		function confirmDel(id){		
+		  var agree = confirm("¿Realmente desea eliminar el registro con id = " + id + "?");
+		  if (agree){
+		  	return true;
+		  } 
+		  return false;
+		}
+
+		function montarRegistro(id, nombre, apellidos, fecha){
+			document.getElementById("id").value = id;
+			document.getElementById("nom").value = nombre;
+			document.getElementById("cognom").value = apellidos;
+			document.getElementById("datanaix").value = fecha;
+		}
+
+	</script>
 </head>
 <body>
 	<div class="w3-card-4">
@@ -13,29 +31,44 @@
 		</div>
 		<form class="w3-container" method="POST" action="listado.php">
 			<p>
-			<label class="w3-label w3-text-brown"><b>Nom</b></label>
-			<input class="w3-input w3-border w3-sand" id="nom" name="nom" type="text">
+				<input type="hidden" id="id" name="id">
 			</p>
-
+			<p>
+			<label class="w3-label w3-text-brown"><b>Nom</b></label>
+			<span class="w3-text-brown">* {{nombreErr}}</span>
+			<input class="w3-input w3-border w3-sand" id="nom" name="nom" type="text" value="{{nombre}}">
+			</p>
 			<p>
 			<label class="w3-label w3-text-brown"><b>Cognom</b></label>
-			<input class="w3-input w3-border w3-sand" id="cognom" name="cognom" type="text">
+			<span class="w3-text-brown">* {{apellidosErr}}</span>
+			<input class="w3-input w3-border w3-sand" id="cognom" name="cognom" type="text" value="{{apellidos}}">
 			</p>
-
 			<p>
 			<label class="w3-label w3-text-brown"><b>Data Naix.</b><i> (format: 2016-07-17)</i></label>
-			<input class="w3-input w3-border w3-sand" id="datanaix" name="datanaix" type="text"></p>
-
+			<span class="w3-text-brown">* {{fechaNacimientoErr}}</span>
+			<input class="w3-input w3-border w3-sand" id="datanaix" name="datanaix" type="text" value="{{fechaNacimiento}}"></p>
 			<p><input class="w3-btn w3-brown" type="submit" name="submit" value="Enregistrar"></p>
 		</form>
 	</div>
 	<div class="w3-container w3-responsive">
+		{% if mensajeInsertOK %}
+	    <div class="w3-container w3-green"><h4>{{mensajeInsertOK}}</h4></div>
+	    {% endif %}
+		{% if mensajeDelete %}
+	    <div class="w3-container w3-pale-red"><h4>{{mensajeDelete}}</h4></div>
+	    {% endif %}
+	    {% if mensajeUpdatedOK %}
+	    <div class="w3-container w3-blue"><h4>{{mensajeUpdatedOK}}</h4></div>
+	    {% endif %}
+		{% if mensajeNoResultados is empty %}
 		<table class="w3-table w3-bordered w3-striped w3-large">
 			<tr class="w3-light-grey">
 				<th>Id</th>
 				<th>Nom</th>
 				<th>Cognoms</th>
 				<th>Data Naix.</th>
+				<th></th>
+				<th></th>
 			</tr>
 			{% for miembro in miembros %}
 			<tr>
@@ -43,9 +76,14 @@
 				<td>{{miembro.nombre}}</td>
 				<td>{{miembro.apellidos}}</td>
 				<td>{{miembro.fechaNacimiento}}</td>
+				<td><a class="w3-btn w3-pale-red w3-border" onclick="return confirmDel({{miembro.id}})" href="listado.php?rowid={{miembro.id}}">Eliminar</a></td>
+				<td><a class="w3-btn w3-blue w3-border" id="modificar" onclick="montarRegistro({{miembro.id}}, '{{miembro.nombre}}', '{{miembro.apellidos}}', '{{miembro.fechaNacimiento}}')">Modificar</a></td>
 			</tr> 
 			{% endfor %}
 		</table>
+		{% else %}
+		<div class="w3-container w3-red"><h4>{{ mensajeNoResultados }}</h4></div>
+		{% endif %}
 	</div> 
 </body>
 </html>

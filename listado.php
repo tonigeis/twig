@@ -9,6 +9,16 @@ $password = "";
 $dbname = "db_empl";
 $miembros = array();
 
+$nombre = $apellidos = $fechaNacimiento = "";
+$nombreErr = $apellidosErr = $fechaNacimientoErr = "";
+
+$mensajeNoResultados = "";
+$mensajeInsertOK = "";
+$mensajeDelete = "";
+$mensajeUpdatedOK = "";
+
+
+
 try {
   // define template directory location
   $loader = new Twig_Loader_Filesystem('templates');
@@ -30,12 +40,51 @@ try {
     if (!empty($_POST['nom']) 
     && !empty($_POST['cognom']) 
     && $fechaNacimientoValida) {
-      $sql = "INSERT INTO empleados (nombre, apellidos, fechaNacimiento)
-              VALUES ('".$_POST['nom']."', '".$_POST['cognom']."', '".$_POST['datanaix']."')";
+      if (!$_POST['id']){
+        $sql = "INSERT INTO empleados (nombre, apellidos, fechaNacimiento)
+        VALUES ('".$_POST['nom']."', '".$_POST['cognom']."', '".$_POST['datanaix']."')";
+        if ($conn->query($sql) === TRUE) {
+          $mensajeInsertOK = "Se ha creado un nuego registro";
+        } else {
+          echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+      }
+      else{
+        $sql = "UPDATE empleados SET nombre='".$_POST['nom']."', apellidos='".$_POST['cognom']."', fechaNacimiento='".$_POST['datanaix']."' WHERE id='".$_POST['id']."'";
+        if ($conn->query($sql) === TRUE) {
+            $mensajeUpdatedOK = "Se ha actualizado el registro con id = ".$_POST['id'];
+        } else {
+            echo "Error updating record: " . $conn->error;
+        }
+      }
+    }
+    else{
+      if (empty($_POST["nom"])) {
+          $nombreErr = "El nombre es un campo obligatorio";
+      }
+      else{
+        $nombre = $_POST['nom'];
+      }
+      if (empty($_POST["cognom"])) {
+          $apellidosErr = "El apellido es un campo obligatorio";
+      }
+      else{
+        $apellidos = $_POST['cognom'];
+      }
+      if (!$fechaNacimientoValida) {
+        $fechaNacimientoErr = "La fecha de nacimiento no es válida";
+      }
+    }
+  }
+
+  if ($_SERVER["REQUEST_METHOD"] == "GET") {
+    if (isset($_GET['rowid'])) {
+      $sql = "DELETE FROM empleados WHERE id = ".$_GET['rowid'];
+
       if ($conn->query($sql) === TRUE) {
-        $mensajeInsertOK = "Se ha creado un nuego registro";
+          $mensajeDelete = "Se ha eliminado el registro con id = ".$_GET['rowid'];
       } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
+          echo "Error: " . $sql . "<br>" . $conn->error;
       }
     }
   }
@@ -50,14 +99,24 @@ try {
       array_push($miembros, $miembro);
     }
   } else{
-    echo "No hay resultados que mostrar";
+    $mensajeNoResultados = "No hay resultados que mostrar";
   }
   $conn->close();
 
   // set template variables
   // render template
   echo $template->render(array (
-    'miembros' => $miembros
+    'miembros' => $miembros,
+    'mensajeNoResultados' => $mensajeNoResultados,
+    'mensajeInsertOK' => $mensajeInsertOK,
+    'mensajeUpdatedOK' => $mensajeUpdatedOK,
+    'mensajeDelete' => $mensajeDelete,
+    'nombre' => $nombre,
+    'apellidos' => $apellidos,
+    'fechaNacimiento' => $fechaNacimiento,
+    'nombreErr' => $nombreErr,
+    'apellidosErr' => $apellidosErr,
+    'fechaNacimientoErr' => $fechaNacimientoErr,
   ));
   
 } catch (Exception $e) {
